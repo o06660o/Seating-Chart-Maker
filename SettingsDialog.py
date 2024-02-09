@@ -78,7 +78,7 @@ class SettingsDialog(QDialog):
             settings = read_settings()
             if self.text1!= "" and "," in self.text1:
                 temp = self.text1.split(",")
-                temp = [int(a) - 1 for a in temp]
+                temp = [int(a) for a in temp]
                 settings["exception"] = temp
             if self.text2 != "" and "," in self.text2:
                 temp = self.text2.split(",")
