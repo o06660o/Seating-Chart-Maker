@@ -72,9 +72,30 @@ class SettingsDialog(QDialog):
             layout.addWidget(self.save_button)
             self.setLayout(layout)
             
+        def settings_valid(self) -> bool:
+            """return True if the input settings are valid"""
+            if self.text1!= "" and "," in self.text1:
+                temp = self.text1.split(",")
+                for number in temp:
+                    try: number = int(number)
+                    except ValueError:
+                        return False
+                    except Exception as e:
+                        print(e)
+                        return False
+                    if number <= 0 or number >= 51:
+                        return False
+            if self.text2 != "" and "," in self.text2:
+                temp = self.text2.split(",")
+                if len(temp) != 50:
+                    return False
+            return True
+            
             
         def save_settings(self) -> None:
             """Save the settings to the settings file"""
+            if not self.settings_valid():
+                return None
             settings = read_settings()
             if self.text1!= "" and "," in self.text1:
                 temp = self.text1.split(",")
