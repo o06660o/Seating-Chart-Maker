@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.settings = read_settings()
 
-        self.arrangements = [i for i in range(50)]
+        self.arrangements = list(range(50))
         # self.names = [f"00{i + 1:02d}" for i in range(50)]
         self.names: list[str] = self.settings["names"]
 
@@ -39,6 +39,8 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_names)
         self.timer.start(self.interval)
+
+        self.exchange_position = (-1, -1)
 
     def setupUI(self) -> None:
         self.setWindowTitle(self.settings["mainwindow"]["title"])
@@ -66,16 +68,19 @@ class MainWindow(QMainWindow):
         self.gridLayout = QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
-
         cnt = 0
         for col in (0, 1, 3, 4, 6, 7, 9, 10, 2, 5, 8):
             for row in range(6):
                 label = QLabel(self.gridLayoutWidget)
-                label.setText("   ")
+                label.setText("")
                 label.setObjectName(f"Seat {cnt}")
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 if col in (0, 1, 3, 4, 6, 7, 9, 10):
                     label.setStyleSheet("background-color: lightgreen;")
+                    label.mousePressEvent = (
+                        lambda _, r=row, c=col: self.label_clicked(r, c)
+                    )
+
                 self.gridLayout.addWidget(label, row, col, 1, 1)
                 self.labels.append(label)
                 cnt += 1
@@ -132,6 +137,13 @@ class MainWindow(QMainWindow):
         self.button_draw.setText("抽取幸运学生")
         self.button_draw.clicked.connect(self.open_drawing_dialog)
 
+        self.button_undo_exchange = QPushButton(self.centralwidget)
+        self.button_undo_exchange.setGeometry(QRect(350, 520, 100, 30))
+        self.button_undo_exchange.setObjectName("ButtonUndo")
+        self.button_undo_exchange.setText("undo")
+        self.button_undo_exchange.setVisible(False)
+        self.button_undo_exchange.clicked.connect(self.undo_exchange)
+
         self.label_creator = QLabel(self.centralwidget)
         self.label_creator.setGeometry(QRect(670, 560, 120, 30))
         self.label_creator.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -173,3 +185,38 @@ class MainWindow(QMainWindow):
         """Open the drawing dialog"""
         drawingdialog = DrawingDialog()
         drawingdialog.exec()
+
+    def label_index(self, row: int, col: int) -> int:
+        """get the target label's index"""
+        return row + 6 * (col - (col // 3))
+
+    def label_clicked(self, row: int, col: int) -> None:
+        if self.button_pause.isEnabled():
+            return None
+        if not row in (0, 5):
+            return None
+        # the fist row is 0 and the last row is 5
+        if self.exchange_position == (-1, -1):
+            self.exchange_position = (row, col)
+            self.button_undo_exchange.setVisible(True)
+            self.labels[self.label_index(row, col)].setStyleSheet(
+                "background-color: green;"
+            )
+        else:
+            label1 = self.labels[self.label_index(row, col)]
+            p = self.exchange_position
+            label2 = self.labels[self.label_index(p[0], p[1])]
+            temp = label1.text()
+            label1.setText(label2.text())
+            label2.setText(temp)
+            label2.setStyleSheet("background-color: lightgreen;")
+            self.exchange_position = (-1, -1)
+            self.button_undo_exchange.setVisible(False)
+
+    def undo_exchange(self) -> None:
+        p = self.exchange_position
+        self.labels[self.label_index(p[0], p[1])].setStyleSheet(
+            "background-color: lightgreen;"
+        )
+        self.exchange_position = (-1, -1)
+        self.button_undo_exchange.setVisible(False)
