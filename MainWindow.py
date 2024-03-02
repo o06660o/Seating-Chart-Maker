@@ -1,55 +1,64 @@
 # -*- coding: utf-8 -*-
 
-import random, time
+import random
+import time
 
 from PySide6.QtCore import QTimer, QRect, QMetaObject, Qt
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import (QMainWindow, QLabel, QWidget, QMenuBar,
-    QStatusBar, QGridLayout, QHBoxLayout, QPushButton)
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QLabel,
+    QWidget,
+    QMenuBar,
+    QStatusBar,
+    QGridLayout,
+    QHBoxLayout,
+    QPushButton,
+)
 
 from util import read_settings
 from SettingsDialog import SettingsDialog
 from DrawingDialog import DrawingDialog
 
+
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.settings = read_settings()
-        
+
         self.arrangements = [i for i in range(50)]
         # self.names = [f"00{i + 1:02d}" for i in range(50)]
         self.names: list[str] = self.settings["names"]
-        
+
         # init the main window
         self.labels: list[QLabel] = []
-        self.setupUI(self)
+        self.setupUI()
 
         self.interval = self.settings["timer_interval"]
         # init the timer to update students' names
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_names)
-        self.timer.start(self.interval)       
+        self.timer.start(self.interval)
 
-
-    def setupUI(self, MainWindow: QMainWindow) -> None:
-        MainWindow.setWindowTitle(self.settings["mainwindow"]["title"])
-        MainWindow.setObjectName("MainWindow")
+    def setupUI(self) -> None:
+        self.setWindowTitle(self.settings["mainwindow"]["title"])
+        self.setObjectName("MainWindow")
         MainWindow_size = self.settings["mainwindow"]["size"]
-        MainWindow.resize(MainWindow_size[0], MainWindow_size[1])
-        MainWindow.setWindowIcon(QPixmap("./assets/icons/MainWindow.jpg"))
-        
-        self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.resize(MainWindow_size[0], MainWindow_size[1])
+        self.setWindowIcon(QPixmap("./assets/icons/MainWindow.jpg"))
 
-        self.menubar = QMenuBar(MainWindow)
+        self.centralwidget = QWidget(self)
+        self.centralwidget.setObjectName("centralwidget")
+        self.setCentralWidget(self.centralwidget)
+
+        self.menubar = QMenuBar(self)
         self.menubar.setGeometry(QRect(0, 0, 800, 20))
         self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QStatusBar(MainWindow)
+        self.setMenuBar(self.menubar)
+        self.statusbar = QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
-        QMetaObject.connectSlotsByName(MainWindow)        
+        self.setStatusBar(self.statusbar)
+        QMetaObject.connectSlotsByName(self)
 
         self.gridLayoutWidget = QWidget(self.centralwidget)
         self.gridLayoutWidget.setGeometry(QRect(50, 130, 700, 300))
@@ -62,21 +71,19 @@ class MainWindow(QMainWindow):
         for col in (0, 1, 3, 4, 6, 7, 9, 10, 2, 5, 8):
             for row in range(6):
                 label = QLabel(self.gridLayoutWidget)
-                label.setText(f"   ")
+                label.setText("   ")
                 label.setObjectName(f"Seat {cnt}")
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 if col in (0, 1, 3, 4, 6, 7, 9, 10):
                     label.setStyleSheet("background-color: lightgreen;")
-                self.gridLayout.addWidget(label, row, col, 1, 1)   
+                self.gridLayout.addWidget(label, row, col, 1, 1)
                 self.labels.append(label)
                 cnt += 1
 
         self.horizontalLayoutWidget = QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(
-            QRect(340, 440, 120, 45))
+        self.horizontalLayoutWidget.setGeometry(QRect(340, 440, 120, 45))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        self.horizontalLayout = QHBoxLayout(
-            self.horizontalLayoutWidget)
+        self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.label1 = QLabel(self.horizontalLayoutWidget)
@@ -110,7 +117,8 @@ class MainWindow(QMainWindow):
         self.label_lectern.setObjectName("LabelLectern")
         self.label_lectern.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_lectern.setText(
-            "<span style='font-size:36pt; color:red;'>讲 台</span>")
+            "<span style='font-size:36pt; color:red;'>讲 台</span>"
+        )
 
         self.button_settings = QPushButton(self.centralwidget)
         self.button_settings.setGeometry(QRect(50, 520, 100, 30))
@@ -133,10 +141,9 @@ class MainWindow(QMainWindow):
             </span>"
         )
 
-
     def update_names(self) -> None:
         """Change the name in each label in the grid layout"""
-        
+
         random.seed(time.time())
         random.shuffle(self.arrangements)
         cur = 0
@@ -146,25 +153,21 @@ class MainWindow(QMainWindow):
             label = self.labels[cur]
             cur += 1
             label.setText(self.names[self.arrangements[number]])
-        
-        
+
     def pause(self) -> None:
         self.button_pause.setEnabled(False)
         self.button_continue_.setEnabled(True)
         self.timer.stop()
-    
-    
+
     def continue_(self) -> None:
         self.button_pause.setEnabled(True)
         self.button_continue_.setEnabled(False)
         self.timer.start(self.interval)
 
-
     def open_settings_dialog(self) -> None:
         """Open the settings dialog"""
         settingsdialog = SettingsDialog()
         settingsdialog.exec()
-
 
     def open_drawing_dialog(self) -> None:
         """Open the drawing dialog"""
