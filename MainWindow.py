@@ -32,7 +32,10 @@ class MainWindow(QMainWindow):
 
         # init the main window
         self.labels: list[QLabel] = []
-        self.setupUI()
+        self.setup_window()
+        self.setup_seats()
+        self.setup_buttons()
+        self.setup_message()
 
         self.interval = self.settings["timer_interval"]
         # init the timer to update students' names
@@ -42,7 +45,7 @@ class MainWindow(QMainWindow):
 
         self.exchange_position = (-1, -1)
 
-    def setupUI(self) -> None:
+    def setup_window(self) -> None:
         self.setWindowTitle(self.settings["mainwindow"]["title"])
         self.setObjectName("MainWindow")
         MainWindow_size = self.settings["mainwindow"]["size"]
@@ -62,6 +65,7 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.statusbar)
         QMetaObject.connectSlotsByName(self)
 
+    def setup_seats(self) -> None:
         self.gridLayoutWidget = QWidget(self.centralwidget)
         self.gridLayoutWidget.setGeometry(QRect(50, 130, 700, 300))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
@@ -105,25 +109,19 @@ class MainWindow(QMainWindow):
         self.label1.setText(self.names[exception[0] - 1])
         self.label2.setText(self.names[exception[1] - 1])
 
+    def setup_buttons(self) -> None:
         self.button_continue_ = QPushButton(self.centralwidget)
         self.button_continue_.setGeometry(QRect(620, 520, 100, 30))
         self.button_continue_.setObjectName("ButtonContinue")
         self.button_continue_.setText("Continue")
         self.button_continue_.clicked.connect(self.continue_)
         self.button_continue_.setEnabled(False)
+
         self.button_pause = QPushButton(self.centralwidget)
         self.button_pause.setGeometry(QRect(500, 520, 100, 30))
         self.button_pause.setObjectName("ButtonPause")
         self.button_pause.setText("Pause")
         self.button_pause.clicked.connect(self.pause)
-
-        self.label_lectern = QLabel(self.centralwidget)
-        self.label_lectern.setGeometry(QRect(325, 20, 150, 80))
-        self.label_lectern.setObjectName("LabelLectern")
-        self.label_lectern.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_lectern.setText(
-            "<span style='font-size:36pt; color:red;'>讲 台</span>"
-        )
 
         self.button_settings = QPushButton(self.centralwidget)
         self.button_settings.setGeometry(QRect(50, 520, 100, 30))
@@ -144,13 +142,21 @@ class MainWindow(QMainWindow):
         self.button_undo_exchange.setVisible(False)
         self.button_undo_exchange.clicked.connect(self.undo_exchange)
 
+    def setup_message(self) -> None:
+        self.label_lectern = QLabel(self.centralwidget)
+        self.label_lectern.setGeometry(QRect(325, 20, 150, 80))
+        self.label_lectern.setObjectName("LabelLectern")
+        self.label_lectern.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_lectern.setText(
+            "<span style='font-size:36pt; color:red;'>讲 台</span>"
+        )
         self.label_creator = QLabel(self.centralwidget)
         self.label_creator.setGeometry(QRect(670, 560, 120, 30))
         self.label_creator.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.label_creator.setText(
             "<span style='font-size:8pt; color:gray;'>\
-            Created by o06660o\
-            </span>"
+                Created by o06660o\
+                </span>"
         )
 
     def update_names(self) -> None:
