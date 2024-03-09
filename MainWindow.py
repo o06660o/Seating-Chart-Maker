@@ -2,6 +2,7 @@
 
 import random
 import time
+import win32gui
 
 from PySide6.QtCore import QTimer, QRect, QMetaObject, Qt
 from PySide6.QtGui import QPixmap
@@ -14,6 +15,7 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QPushButton,
+    QApplication,
 )
 
 from util import read_settings
@@ -110,15 +112,16 @@ class MainWindow(QMainWindow):
         self.label2.setText(self.names[exception[1] - 1])
 
     def setup_buttons(self) -> None:
+        # 6 buttons with x coordinate 50 170 290 410 530 650
         self.button_continue_ = QPushButton(self.centralwidget)
-        self.button_continue_.setGeometry(QRect(620, 520, 100, 30))
+        self.button_continue_.setGeometry(QRect(410, 520, 100, 30))
         self.button_continue_.setObjectName("ButtonContinue")
         self.button_continue_.setText("Continue")
         self.button_continue_.clicked.connect(self.continue_)
         self.button_continue_.setEnabled(False)
 
         self.button_pause = QPushButton(self.centralwidget)
-        self.button_pause.setGeometry(QRect(500, 520, 100, 30))
+        self.button_pause.setGeometry(QRect(290, 520, 100, 30))
         self.button_pause.setObjectName("ButtonPause")
         self.button_pause.setText("Pause")
         self.button_pause.clicked.connect(self.pause)
@@ -136,11 +139,18 @@ class MainWindow(QMainWindow):
         self.button_draw.clicked.connect(self.open_drawing_dialog)
 
         self.button_undo_exchange = QPushButton(self.centralwidget)
-        self.button_undo_exchange.setGeometry(QRect(350, 520, 100, 30))
+        self.button_undo_exchange.setGeometry(QRect(650, 520, 100, 30))
         self.button_undo_exchange.setObjectName("ButtonUndo")
         self.button_undo_exchange.setText("undo")
         self.button_undo_exchange.setVisible(False)
         self.button_undo_exchange.clicked.connect(self.undo_exchange)
+
+        self.button_screenshot = QPushButton(self.centralwidget)
+        self.button_screenshot.setGeometry(QRect(530, 520, 100, 30))
+        self.button_screenshot.setObjectName("ButtonScreenshot")
+        self.button_screenshot.setText("save")
+        self.button_screenshot.clicked.connect(self.capture_screenshot)
+        self.button_screenshot.setVisible(False)
 
     def setup_message(self) -> None:
         self.label_lectern = QLabel(self.centralwidget)
@@ -175,11 +185,13 @@ class MainWindow(QMainWindow):
     def pause(self) -> None:
         self.button_pause.setEnabled(False)
         self.button_continue_.setEnabled(True)
+        self.button_screenshot.setVisible(True)
         self.timer.stop()
 
     def continue_(self) -> None:
         self.button_pause.setEnabled(True)
         self.button_continue_.setEnabled(False)
+        self.button_screenshot.setVisible(False)
         self.timer.start(self.interval)
 
     def open_settings_dialog(self) -> None:
@@ -226,3 +238,14 @@ class MainWindow(QMainWindow):
         )
         self.exchange_position = (-1, -1)
         self.button_undo_exchange.setVisible(False)
+
+    def capture_screenshot(self) -> None:
+        handle = win32gui.FindWindow(None, "Seating Chart Maker")
+        if handle == 0:
+            print("Window 'Seating Chart Maker' is not found.")
+            return None
+        name = time.asctime().split()[3]
+        name = name.replace(":", "-")
+        screen = QApplication.primaryScreen()
+        img = screen.grabWindow(handle).toImage()
+        img.save(f"./screenshots/{name}.jpg")
