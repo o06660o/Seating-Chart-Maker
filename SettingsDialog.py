@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QVBoxLayout,
+    QTextEdit,
 )
 
 from util import read_settings
@@ -17,27 +18,34 @@ from util import read_settings
 class SettingsDialog(QDialog):
     def __init__(self) -> None:
         super().__init__()
+        self.settings = read_settings()
         self.setupUI()
 
     def setupUI(self) -> None:
         self.setWindowTitle("Settings")
-        self.resize(400, 200)
+        self.resize(400, 270)
         self.setWindowIcon(QPixmap("./assets/icons/SettingsDialog.png"))
 
         # Create widgets for the settings
-        self.lbel_exception = QLabel(
+        self.label_exception = QLabel(
             "输入坐在最后两个的同学学号(不输入表示不修改):\
-            \n样例输入1,2\
-            \n请用英文逗号分隔两个数据, 逗号前后不要加空格"
+            \n样例输入1, 2\
+            \n请用英文逗号分隔两个数据"
         )
-        self.edit_exception = QLineEdit()
+        self.edit_exception = QTextEdit()
+        text = str(self.settings["exception"])[1:-1]
+        self.edit_exception.setPlainText(text)
+        self.edit_exception.setMaximumSize(400, 28)
         self.label_names = QLabel("输入同学的姓名(不输入表示不修改):")
-        self.edit_names = QLineEdit()
+        text = str(self.settings["names"])[1:-1]
+        text = text.replace("'", "")
+        self.edit_names = QTextEdit()
+        self.edit_names.setPlainText(text)
         self.save_button = QPushButton("Save")
         self.save_button.clicked.connect(self.open_warning_dialog)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.lbel_exception)
+        layout.addWidget(self.label_exception)
         layout.addWidget(self.edit_exception)
         layout.addWidget(self.label_names)
         layout.addWidget(self.edit_names)
@@ -46,7 +54,7 @@ class SettingsDialog(QDialog):
 
     def open_warning_dialog(self) -> None:
         warningdialog = self.WarningDialog(
-            self.edit_exception.text(), self.edit_names.text()
+            self.edit_exception.toPlainText(), self.edit_names.toPlainText()
         )
         warningdialog.exec()
 
@@ -106,6 +114,7 @@ class SettingsDialog(QDialog):
                 settings["exception"] = temp
             if self.text2 != "" and "," in self.text2:
                 temp = self.text2.split(",")
+                temp = [name.strip() for name in temp]
                 settings["names"] = temp
 
             with open("settings.json", "w", encoding="utf-8") as file:

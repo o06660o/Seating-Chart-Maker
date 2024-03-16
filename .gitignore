@@ -1,6 +1,9 @@
 /__pycache__
 /.vscode
-/output
 /screenshots
+/main.build
+/main.dist
+/main.onefile-build
+/main.exe
 run.bat
 run.vbs
