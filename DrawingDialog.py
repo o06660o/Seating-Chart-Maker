@@ -24,7 +24,7 @@ class DrawingDialog(QDialog):
         self.settings = read_settings()
         self.names = random.sample(self.settings["names"], 10)
         self.table_font = QFont()
-        self.table_font.setPointSize(24)
+        self.table_font.setPointSize(30)
 
         self.setupUI()
         self.draw10()
@@ -81,7 +81,7 @@ class DrawingDialog(QDialog):
         self.layout_stacked.setCurrentIndex(0)
         name = random.choice(self.settings["names"])
         self.label_result.setText(
-            f"<span style='font-size:60pt; color:red;'>\
+            f"<span style='font-size:80pt; color:red;'>\
             {name}\
             </span>"
         )
