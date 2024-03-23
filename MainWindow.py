@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
 
     def setup_seats(self) -> None:
         self.gridLayoutWidget = QWidget(self.centralwidget)
-        self.gridLayoutWidget.setGeometry(QRect(50, 130, 700, 300))
+        self.gridLayoutWidget.setGeometry(QRect(25, 130, 750, 300))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.gridLayout = QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
@@ -86,13 +86,16 @@ class MainWindow(QMainWindow):
                     label.mousePressEvent = (
                         lambda _, r=row, c=col: self.label_clicked(r, c)
                     )
+                    self.gridLayout.setColumnStretch(col, 2)
+                else:
+                    self.gridLayout.setColumnStretch(col, 1)
 
                 self.gridLayout.addWidget(label, row, col, 1, 1)
                 self.labels.append(label)
                 cnt += 1
 
         self.horizontalLayoutWidget = QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setGeometry(QRect(340, 440, 120, 45))
+        self.horizontalLayoutWidget.setGeometry(QRect(320, 440, 160, 45))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -108,8 +111,16 @@ class MainWindow(QMainWindow):
         self.label2.setStyleSheet("background-color: lightgreen;")
         self.horizontalLayout.addWidget(self.label2)
         exception = self.settings["exception"]
-        self.label1.setText(self.names[exception[0] - 1])
-        self.label2.setText(self.names[exception[1] - 1])
+        self.label1.setText(
+            f"<span style='font-size:13pt;'>\
+            {self.names[exception[0] - 1]}\
+            </span>"
+        )
+        self.label2.setText(
+            f"<span style='font-size:13pt;'>\
+        {self.names[exception[1] - 1]}\
+        </span>"
+        )
 
     def setup_buttons(self) -> None:
         # 6 buttons with x coordinate 50 170 290 410 530 650
@@ -181,6 +192,11 @@ class MainWindow(QMainWindow):
             label = self.labels[cur]
             cur += 1
             label.setText(self.names[self.arrangements[number]])
+            label.setText(
+                f"<span style='font-size:13pt;'>\
+                {self.names[self.arrangements[number]]}\
+                </span>"
+            )
 
     def pause(self) -> None:
         self.button_pause.setEnabled(False)

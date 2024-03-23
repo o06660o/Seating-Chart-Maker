@@ -6,9 +6,9 @@
             600
         ]
     },
-    "timer_interval": 400,
+    "timer_interval": 200,
     "exception": [
-        1,
+        3,
         2
     ],
     "names": [
